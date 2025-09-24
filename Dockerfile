@@ -1,16 +1,12 @@
-FROM rust:1.90 as builder
-WORKDIR /usr/src/app
+# Build stage
+FROM rust:latest AS builder
+WORKDIR /app
 COPY . .
-RUN cargo build --release
+RUN rustup target add x86_64-unknown-linux-musl
+RUN cargo build --release --target x86_64-unknown-linux-musl
 
-FROM gcr.io/distroless/static-debian12
-WORKDIR /bin
-
-# Install runtime dependencies for Rust + OpenSSL
-# RUN apt-get update && apt-get install -y \
-#     ca-certificates \
-#     libssl3 \
-#     && rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder /usr/src/app/target/release/main .
-ENTRYPOINT ["main"]
+# Runtime stage
+FROM alpine:latest
+WORKDIR /app
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/main .
+CMD ["./main"]
