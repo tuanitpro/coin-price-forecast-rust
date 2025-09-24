@@ -1,11 +1,16 @@
 FROM rust:1.90 as builder
 WORKDIR /usr/src/app
-RUN apt-get update && apt-get install -y musl-tools pkg-config libssl-dev
-RUN rustup target add x86_64-unknown-linux-musl
-
 COPY . .
-RUN cargo build --release --target x86_64-unknown-linux-musl
+RUN cargo build --release
 
-FROM scratch
-COPY --from=builder /usr/src/app/target/x86_64-unknown-linux-musl/release/main /
+FROM gcr.io/distroless/static-debian12
+WORKDIR /bin
+
+# Install runtime dependencies for Rust + OpenSSL
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/src/app/target/release/main .
 CMD ["./main"]
