@@ -7,10 +7,10 @@ FROM gcr.io/distroless/static-debian12
 WORKDIR /bin
 
 # Install runtime dependencies for Rust + OpenSSL
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    libssl3 \
-    && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y \
+#     ca-certificates \
+#     libssl3 \
+#     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/src/app/target/release/main .
-CMD ["./main"]
+ENTRYPOINT ["main"]
