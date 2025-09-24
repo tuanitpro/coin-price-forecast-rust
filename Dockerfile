@@ -5,4 +5,4 @@ RUN cargo build --release
 
 FROM scratch
 COPY --from=builder /usr/src/app/target/release/main /
-CMD ["/main"]
+CMD ["./main"]
