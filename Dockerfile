@@ -8,16 +8,12 @@ RUN apk add --no-cache \
 RUN rustup target add x86_64-unknown-linux-musl
 WORKDIR /app
 
-COPY Cargo.toml Cargo.lock ./
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --target x86_64-unknown-linux-musl --release
-
 COPY . .
 RUN cargo build --target x86_64-unknown-linux-musl --release
 
 FROM scratch
-WORKDIR /app
+WORKDIR /bin
 
-COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/main /usr/local/bin/main
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/main .
 
-ENTRYPOINT ["/usr/local/bin/main"]
+ENTRYPOINT ["./main"]
