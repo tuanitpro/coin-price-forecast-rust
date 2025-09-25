@@ -1,6 +1,6 @@
-mod telegram;
-mod  binance;
+mod binance;
 mod olhc_forecast;
+mod telegram;
 
 use std::thread;
 use std::time::Duration;
@@ -12,7 +12,7 @@ use std::env;
 
 use olhc_forecast::OhlcForecast;
 
-fn main() ->  PolarsResult<()> {
+fn main() -> PolarsResult<()> {
     dotenv().ok(); // Load environment variables from .env
 
     let sleep: u64 = env::var("SLEEP_SECONDS")
@@ -22,7 +22,7 @@ fn main() ->  PolarsResult<()> {
 
     let forecast = OhlcForecast::new();
     loop {
-       let _ =  forecast.run()?;
+        let _ = forecast.run()?;
         println!("Sleeping for {} seconds...", sleep);
         thread::sleep(Duration::from_secs(sleep));
     }
