@@ -1,9 +1,10 @@
-FROM rust:slim AS builder
-RUN apt-get update && apt-get install -y \
-    musl-tools \
-    pkg-config \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+FROM rust:alpine AS builder
+RUN apk add --no-cache \
+    musl-dev \
+    openssl-dev \
+    pkgconfig \
+    && rm -rf /var/cache/apk/*
+
 RUN rustup target add x86_64-unknown-linux-musl
 WORKDIR /app
 
@@ -11,9 +12,8 @@ COPY Cargo.toml Cargo.lock ./
 RUN mkdir src && echo "fn main() {}" > src/main.rs
 RUN cargo build --target x86_64-unknown-linux-musl --release
 
-COPY src ./src
+COPY . .
 RUN cargo build --target x86_64-unknown-linux-musl --release
-
 
 FROM scratch
 WORKDIR /app
