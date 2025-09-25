@@ -1,4 +1,4 @@
-FROM rust:latest AS builder
+FROM rust:alpine3.22 AS builder
 RUN apk add --no-cache musl-dev gcc g++ make
 
 WORKDIR /app
@@ -10,7 +10,7 @@ RUN cargo build --release
 COPY . .
 RUN cargo build --release
 
-FROM alpine:3.20
+FROM alpine:3.22
 WORKDIR /bin
 
 # dynamic OpenSSL needed here
