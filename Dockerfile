@@ -1,6 +1,9 @@
 FROM rust:latest AS builder
 WORKDIR /app
 
+RUN cargo install sccache
+ENV RUSTC_WRAPPER="sccache"
+
 RUN apt-get update && apt-get install -y \
     musl-tools \
     pkg-config \
@@ -11,10 +14,10 @@ RUN rustup target add x86_64-unknown-linux-musl
 
 COPY Cargo.toml Cargo.lock ./
 RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release --target x86_64-unknown-linux-musl || true
+RUN cargo build --release
 
 COPY . .
-RUN cargo build --release --target x86_64-unknown-linux-musl
+RUN cargo build --release
 
 FROM alpine:latest
 WORKDIR /app
@@ -22,5 +25,5 @@ WORKDIR /app
 # dynamic OpenSSL needed here
 RUN apk add --no-cache libssl3
 
-COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/main ./main
-CMD ["./main"]
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/main .
+CMD ["main"]
