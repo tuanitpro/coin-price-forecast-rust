@@ -4,21 +4,20 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
     && rm -rf /var/lib/apt/lists/*
-    
+RUN rustup target add x86_64-unknown-linux-musl
 WORKDIR /app
 
 COPY Cargo.toml Cargo.lock ./
 RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release
+RUN cargo build --target x86_64-unknown-linux-musl --release
 
-COPY . .
-RUN cargo build --release
+COPY src ./src
+RUN cargo build --target x86_64-unknown-linux-musl --release
 
-FROM alpine:3.22
-WORKDIR /bin
 
-# dynamic OpenSSL needed here
-RUN apk add --no-cache libssl3
+FROM scratch
+WORKDIR /app
 
-COPY --from=builder /app/target/release/main .
-CMD ["./main"]
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/main /usr/local/bin/main
+
+ENTRYPOINT ["/usr/local/bin/main"]
