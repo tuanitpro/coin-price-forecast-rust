@@ -1,11 +1,7 @@
 FROM rust:latest AS builder
-WORKDIR /app
+RUN apk add --no-cache musl-dev gcc g++ make
 
-RUN apt-get update && apt-get install -y \
-    musl-tools \
-    pkg-config \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
 COPY Cargo.toml Cargo.lock ./
 RUN mkdir src && echo "fn main() {}" > src/main.rs
